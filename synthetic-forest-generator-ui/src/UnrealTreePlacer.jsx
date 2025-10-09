@@ -192,7 +192,8 @@ export default function UnrealTreePlacer() {
 
   function postToBackend() {
     const payload = generateUnrealJSON();
-    fetch("/api/sim/launch", {
+
+    fetch("http://localhost:8080/api/sim/launch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -201,6 +202,7 @@ export default function UnrealTreePlacer() {
       .then((j) => alert("Backend response: " + JSON.stringify(j)))
       .catch((err) => alert("Error posting to backend: " + err));
   }
+
 
   function generateUnrealJSON() {
     // Map each placed tree into Unreal coordinate system using transformSettings
@@ -298,16 +300,16 @@ export default function UnrealTreePlacer() {
         <div className="text-sm">Center-based mapping: canvas center → (0,0) in unreal by default. You can change origin and scale below.</div>
         <div className="space-y-2 mt-2">
           <label className="block text-sm">Origin X (px)
-            <input className="w-full" type="number" value={transformSettings.originX} onChange={(e) => setTransformSettings(s => ({...s, originX: Number(e.target.value)}))} />
+            <input className="w-full" type="number" value={transformSettings.originX} onChange={(e) => setTransformSettings(s => ({ ...s, originX: Number(e.target.value) }))} />
           </label>
           <label className="block text-sm">Origin Y (px)
-            <input className="w-full" type="number" value={transformSettings.originY} onChange={(e) => setTransformSettings(s => ({...s, originY: Number(e.target.value)}))} />
+            <input className="w-full" type="number" value={transformSettings.originY} onChange={(e) => setTransformSettings(s => ({ ...s, originY: Number(e.target.value) }))} />
           </label>
           <label className="block text-sm">Scale (canvas px -> Unreal units)
-            <input className="w-full" type="number" value={transformSettings.scale} step={0.01} onChange={(e) => setTransformSettings(s => ({...s, scale: Number(e.target.value)}))} />
+            <input className="w-full" type="number" value={transformSettings.scale} step={0.01} onChange={(e) => setTransformSettings(s => ({ ...s, scale: Number(e.target.value) }))} />
           </label>
           <label className="inline-flex items-center gap-2">
-            <input type="checkbox" checked={transformSettings.invertY} onChange={(e) => setTransformSettings(s=>({...s, invertY: e.target.checked}))} /> Invert Y
+            <input type="checkbox" checked={transformSettings.invertY} onChange={(e) => setTransformSettings(s => ({ ...s, invertY: e.target.checked }))} /> Invert Y
           </label>
         </div>
 
@@ -337,7 +339,7 @@ export default function UnrealTreePlacer() {
           <h3 className="font-medium">Placed trees ({trees.length})</h3>
           <div className="flex gap-2 mt-2 overflow-x-auto">
             {trees.map((t) => (
-              <button key={t.id} onClick={() => setSelectedTreeId(t.id)} className={`p-2 border rounded ${t.id===selectedTreeId ? 'border-blue-500' : 'border-gray-200'}`}>
+              <button key={t.id} onClick={() => setSelectedTreeId(t.id)} className={`p-2 border rounded ${t.id === selectedTreeId ? 'border-blue-500' : 'border-gray-200'}`}>
                 <div className="text-sm font-medium">{t.model}</div>
                 <div className="text-xs text-gray-500">x:{Math.round(t.x)} y:{Math.round(t.y)}</div>
               </button>
