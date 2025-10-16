@@ -10,13 +10,28 @@ import (
 const port = ":8080"
 
 func main() {
-	http.HandleFunc("/api/sim/launch", handleLaunch)
+	http.HandleFunc("/api/sim/launch", withCORS(handleLaunch))
 
 	fmt.Println("Started server on port", port)
 	err := http.ListenAndServe(port, nil)
 	if err != nil {
 		fmt.Printf("error starting server: %s\n", err)
 		os.Exit(1)
+	}
+}
+
+func withCORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next(w, r)
 	}
 }
 
@@ -33,8 +48,12 @@ func handleLaunch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
+
 	fmt.Printf("Received JSON: %+v\n", payload)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok", "msg": "Simulation started"})
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "ok",
+		"msg":    "Simulation started",
+	})
 }
