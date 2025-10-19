@@ -193,7 +193,7 @@ export default function UnrealTreePlacer() {
   function postToBackend() {
     const payload = generateUnrealJSON();
 
-    fetch("http://localhost:8080/api/sim/launch", {
+    fetch("http://localhost:8080/v1/sim/launch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
