@@ -4,7 +4,7 @@
 -- Таблица пользователей
 CREATE TABLE api_user
 (
-    id            SERIAL PRIMARY KEY,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     login         VARCHAR(50) NOT NULL UNIQUE,
     email         VARCHAR(100) UNIQUE,
     password_hash TEXT        NOT NULL,
@@ -22,8 +22,8 @@ COMMENT ON COLUMN api_user.created_at IS 'Дата и время создани�
 -- Таблица проектов
 CREATE TABLE project
 (
-    id            SERIAL PRIMARY KEY,
-    owner_id      INT          REFERENCES api_user (id) ON DELETE SET NULL,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    owner_id      BIGINT REFERENCES api_user (id) ON DELETE SET NULL,
     title         VARCHAR(100) NOT NULL,
     description   TEXT,
     created_at    TIMESTAMP DEFAULT now(),
@@ -34,26 +34,46 @@ CREATE INDEX idx_project_owner ON project (owner_id);
 COMMENT ON TABLE project IS 'Проекты симуляций (группа работ, набор симуляций).';
 COMMENT ON COLUMN project.is_public IS 'Флаг публичности проекта (доступен гостям).';
 
+
 -- Таблица ролей
-CREATE TABLE project_roles
+CREATE TABLE dictionary_project_role
 (
-    id          SERIAL PRIMARY KEY,
-    project_id  INT REFERENCES project (id) ON DELETE CASCADE,
+    code        varchar(3) PRIMARY KEY,
     name        VARCHAR(30) NOT NULL UNIQUE,
     description TEXT
 );
-CREATE INDEX idx_api_roles_project_id ON project_roles (project_id);
 
-COMMENT ON TABLE project_roles IS 'Роли пользователей и их описания (admin, analyst, guest).';
-COMMENT ON COLUMN project_roles.name IS 'Название роли: admin, analyst, guest.';
-COMMENT ON COLUMN project_roles.description IS 'Текстовое описание прав и обязанностей роли.';
+-- Таблица участников проекта
+-- changeset StepanenkoES:002
+
+CREATE TABLE project_user
+(
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_id  BIGINT NOT NULL REFERENCES project (id) ON DELETE CASCADE,
+    user_id     BIGINT NOT NULL REFERENCES api_user (id) ON DELETE CASCADE,
+    role_code   VARCHAR(3) REFERENCES dictionary_project_role (code) ON DELETE SET NULL,
+    created_at    TIMESTAMP DEFAULT now(),
+    UNIQUE (project_id, user_id)
+);
+
+CREATE INDEX idx_project_user_project ON project_user (project_id);
+CREATE INDEX idx_project_user_user ON project_user (user_id);
+
+COMMENT ON TABLE project_user IS 'Участники проекта с ролями (admin, analyst, guest).';
+COMMENT ON COLUMN project_user.role_code IS 'Код роли участника (ссылка на справочник ролей).';
+COMMENT ON COLUMN project_user.added_at IS 'Дата добавления участника в проект.';
+
+
+COMMENT ON TABLE project_role IS 'Роли пользователей и их описания (admin, analyst, guest).';
+COMMENT ON COLUMN project_role.name IS 'Название роли: admin, analyst, guest.';
+COMMENT ON COLUMN project_role.description IS 'Текстовое описание прав и обязанностей роли.';
 
 -- Таблица шаблонов
 CREATE TABLE template
 (
-    id            SERIAL PRIMARY KEY,
-    user_id       INT          REFERENCES api_user (id) ON DELETE SET NULL,
-    simulation_id INT          REFERENCES project (id) ON DELETE SET NULL,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id       BIGINT REFERENCES api_user (id) ON DELETE SET NULL,
+    project_id    BIGINT REFERENCES project (id) ON DELETE SET NULL,
     name          VARCHAR(100) NOT NULL,
     description   TEXT,
     parameters    JSONB,
@@ -62,16 +82,15 @@ CREATE TABLE template
 CREATE INDEX idx_template_user ON template (user_id);
 COMMENT ON TABLE template IS 'Сохранённые шаблоны параметров симуляций для быстрого применения.';
 
-
 -- Таблица симуляций
 CREATE TABLE simulation
 (
-    id          SERIAL PRIMARY KEY,
-    template_id  INT REFERENCES template (id) ON DELETE CASCADE,
-    user_id     INT REFERENCES api_user (id) ON DELETE SET NULL,
-    status      VARCHAR(20) DEFAULT 'pending',
-    started_at  TIMESTAMP   DEFAULT now(),
-    finished_at TIMESTAMP
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    template_id  BIGINT REFERENCES template (id) ON DELETE CASCADE,
+    user_id      BIGINT REFERENCES api_user (id) ON DELETE SET NULL,
+    status       VARCHAR(20) DEFAULT 'pending',
+    started_at   TIMESTAMP DEFAULT now(),
+    finished_at  TIMESTAMP
 );
 CREATE INDEX idx_simulation_template ON simulation (template_id);
 COMMENT ON TABLE simulation IS 'Фиксированные запуски симуляций (копия параметров и путь к результатам).';
@@ -79,8 +98,8 @@ COMMENT ON TABLE simulation IS 'Фиксированные запуски сим
 -- Таблица результатов симуляции
 CREATE TABLE simulation_result
 (
-    id             SERIAL PRIMARY KEY,
-    simulation_id  INT REFERENCES simulation (id) ON DELETE CASCADE,
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    simulation_id  BIGINT REFERENCES simulation (id) ON DELETE CASCADE,
     result_zip     BYTEA,
     created_at     TIMESTAMP DEFAULT now()
 );
