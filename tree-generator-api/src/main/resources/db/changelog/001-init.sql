@@ -43,16 +43,13 @@ CREATE TABLE dictionary_project_role
     description TEXT
 );
 
--- Таблица участников проекта
--- changeset StepanenkoES:002
-
 CREATE TABLE project_user
 (
     id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     project_id  BIGINT NOT NULL REFERENCES project (id) ON DELETE CASCADE,
     user_id     BIGINT NOT NULL REFERENCES api_user (id) ON DELETE CASCADE,
     role_code   VARCHAR(3) REFERENCES dictionary_project_role (code) ON DELETE SET NULL,
-    created_at    TIMESTAMP DEFAULT now(),
+    created_at  TIMESTAMP DEFAULT now(),
     UNIQUE (project_id, user_id)
 );
 
