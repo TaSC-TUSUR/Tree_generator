@@ -13,7 +13,7 @@ public abstract class AbstractCrudService<
         REPO extends JpaRepository<ENTITY, ID>> {
 
     private final REPO repository;
-    MAPPER mapper;
+    private final MAPPER mapper;
 
     public DTO save(DTO dto) {
         var entity = mapper.toEntity(dto);
