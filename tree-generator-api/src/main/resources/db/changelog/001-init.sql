@@ -1,7 +1,9 @@
 --liquibase formatted sql
 --changeset StepanenkoES:001
 
+-- ===============================
 -- Таблица пользователей
+-- ===============================
 CREATE TABLE api_user
 (
     id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -19,7 +21,9 @@ COMMENT ON COLUMN api_user.password_hash IS 'Хэш пароля (bcrypt/argon2 
 COMMENT ON COLUMN api_user.full_name IS 'Полное имя пользователя.';
 COMMENT ON COLUMN api_user.created_at IS 'Дата и время создания учётной записи.';
 
+-- ===============================
 -- Таблица проектов
+-- ===============================
 CREATE TABLE project
 (
     id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -31,18 +35,27 @@ CREATE TABLE project
     is_public     BOOLEAN   DEFAULT false
 );
 CREATE INDEX idx_project_owner ON project (owner_id);
+
 COMMENT ON TABLE project IS 'Проекты симуляций (группа работ, набор симуляций).';
 COMMENT ON COLUMN project.is_public IS 'Флаг публичности проекта (доступен гостям).';
 
-
--- Таблица ролей
+-- ===============================
+-- Таблица ролей проекта (справочник)
+-- ===============================
 CREATE TABLE dictionary_project_role
 (
-    code        varchar(3) PRIMARY KEY,
+    code        VARCHAR(3) PRIMARY KEY,
     name        VARCHAR(30) NOT NULL UNIQUE,
     description TEXT
 );
 
+COMMENT ON TABLE dictionary_project_role IS 'Роли пользователей и их описания (admin, analyst, guest).';
+COMMENT ON COLUMN dictionary_project_role.name IS 'Название роли: admin, analyst, guest.';
+COMMENT ON COLUMN dictionary_project_role.description IS 'Текстовое описание прав и обязанностей роли.';
+
+-- ===============================
+-- Таблица участников проекта
+-- ===============================
 CREATE TABLE project_user
 (
     id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -58,14 +71,11 @@ CREATE INDEX idx_project_user_user ON project_user (user_id);
 
 COMMENT ON TABLE project_user IS 'Участники проекта с ролями (admin, analyst, guest).';
 COMMENT ON COLUMN project_user.role_code IS 'Код роли участника (ссылка на справочник ролей).';
-COMMENT ON COLUMN project_user.added_at IS 'Дата добавления участника в проект.';
+COMMENT ON COLUMN project_user.created_at IS 'Дата добавления участника в проект.';
 
-
-COMMENT ON TABLE project_role IS 'Роли пользователей и их описания (admin, analyst, guest).';
-COMMENT ON COLUMN project_role.name IS 'Название роли: admin, analyst, guest.';
-COMMENT ON COLUMN project_role.description IS 'Текстовое описание прав и обязанностей роли.';
-
--- Таблица шаблонов
+-- ===============================
+-- Таблица шаблонов симуляций
+-- ===============================
 CREATE TABLE template
 (
     id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -76,10 +86,14 @@ CREATE TABLE template
     parameters    JSONB,
     created_at    TIMESTAMP DEFAULT now()
 );
+
 CREATE INDEX idx_template_user ON template (user_id);
+
 COMMENT ON TABLE template IS 'Сохранённые шаблоны параметров симуляций для быстрого применения.';
 
+-- ===============================
 -- Таблица симуляций
+-- ===============================
 CREATE TABLE simulation
 (
     id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -89,10 +103,14 @@ CREATE TABLE simulation
     started_at   TIMESTAMP DEFAULT now(),
     finished_at  TIMESTAMP
 );
+
 CREATE INDEX idx_simulation_template ON simulation (template_id);
+
 COMMENT ON TABLE simulation IS 'Фиксированные запуски симуляций (копия параметров и путь к результатам).';
 
--- Таблица результатов симуляции
+-- ===============================
+-- Таблица результатов симуляций
+-- ===============================
 CREATE TABLE simulation_result
 (
     id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
