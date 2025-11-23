@@ -14,7 +14,7 @@ public abstract class AbstractCrudController<
         ID,
         MAPPER extends Mapper<DTO, ENTITY>,
         REPO extends JpaRepository<ENTITY, ID>> {
-    private final AbstractCrudService<DTO, ENTITY, ID, MAPPER, REPO> service;
+    protected final AbstractCrudService<DTO, ENTITY, ID, MAPPER, REPO> service;
 
     public ResponseEntity<DTO> create(DTO request) {
         return new ResponseEntity<>(service.save(request), HttpStatus.OK);
