@@ -48,7 +48,7 @@ public class ProjectController extends AbstractCrudController<
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
-    @GetMapping("/{title}")
+    @GetMapping("/title/{title}")
     public ResponseEntity<ProjectDto> findByTitle(@PathVariable String title) {
         var resp = ((ProjectService) service).findByName(title); // Больше костылей для маленькго проекта
         return new ResponseEntity<>(resp, HttpStatus.OK);
