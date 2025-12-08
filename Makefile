@@ -16,7 +16,7 @@ test-post:
 # Get project by ID
 # -------------------
 test-get:
-	curl -X GET $(BASE_URL)/1
+	curl -X GET $(BASE_URL)/all
 
 # -------------------
 # Update project

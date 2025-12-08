@@ -15,7 +15,10 @@ RUN npm run build
 # ---------- Stage 2: Serve ----------
 FROM nginx:stable-alpine
 
-# Copy built app from dist/ (Vite output folder)
+# Add SPA fallback config for React/Vite
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built app
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Expose port 80 (Nginx default)
